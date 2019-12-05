@@ -1,5 +1,6 @@
 <?php
 namespace Gasparonik\Components;
+use \Bitrix\Main\Loader;
 
 class BookMarkElement extends \CBitrixComponent{
 
@@ -10,6 +11,7 @@ class BookMarkElement extends \CBitrixComponent{
 
     function executeComponent()
     {
+        Loader::includeModule('iblock');
         $bookmark = \CIBlockElement::GetByID($this->arParams['ELEMENT_ID'])->GetNextElement();
         if($bookmark){
             $this->arResult = $bookmark->GetFields();

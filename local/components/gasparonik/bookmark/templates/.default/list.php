@@ -8,4 +8,9 @@ $APPLICATION->IncludeComponent('gasparonik:bookmark.list', '.default', [
     'ELEMENT_SORT_ORDER' => $arParams['ELEMENT_SORT_ORDER'],
     'DETAIL_URL' => $arParams['SEF_FOLDER'] . $arParams['SEF_URL_TEMPLATES']['element'],
     'ADD_LINK' => $arParams['SEF_FOLDER'] . $arParams['SEF_URL_TEMPLATES']['add'],
+    'PROPERTY_LINK' => $arParams['PROPERTY_LINK'],
+    'PROPERTY_FAVICON' => $arParams['PROPERTY_FAVICON'],
+    'PROPERTY_PASSWORD' => $arParams['PROPERTY_PASSWORD'],
+    'PROPERTY_DESCRIPTION' => $arParams['PROPERTY_DESCRIPTION'],
+    'PROPERTY_KEYWORDS' => $arParams['PROPERTY_KEYWORDS']
 ]);

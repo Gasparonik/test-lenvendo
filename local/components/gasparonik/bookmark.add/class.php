@@ -27,49 +27,53 @@ class BookmarkAdd extends \CBitrixComponent implements Controllerable {
         ];
     }
 
-    function addAction($data){
 
+    function addAction($data){
+        $checkCP1251 = $description = $keywords = $title = [];
         $reason = 'unknown';
         if(Loader::includeModule('iblock')){
-            $data['link'];
-
             if(\CIBlockElement::GetList(
                 false,
                 [
                     'IBLOCK_ID' => $data['iblock_id'],
-                    'CODE' => $data['link'],
-                    'CREATED_BY' => $GLOBALS['USER_ID']
+                    '=PROPERTY_' . $data['PROPERTY_LINK'] => $data['link'],
+                    'CREATED_BY' => $GLOBALS['USER']->GetID()
                 ],
-                true
-            )){
+                false,
+                false,
+                ['ID', 'IBLOCK_ID', 'PROPERTY_' . $data['PROPERTY_LINK']]
+            )->Fetch()){
                 $reason = 'Element exist';
             }else{
                 $httpClient =  new HttpClient();
                 if($html = $httpClient->get($data['link'])){
-                    if(preg_match('~<head>.+</head>~s', $html, $head)){
+                    if(preg_match('~<head.*>.+</head>~sU', $html, $head)){
                         $html = $head[0];
                         /*favicon*/
                         $domain = parse_url($data['link']);
                         $favicon = $this->getFavicon($domain, $html);
-                        preg_match('~<title.*>(.+)</title>~sU', $html, $title);
-                        preg_match('~<meta\s+name=[\'"]description[\'"]\s+content=[\'"](.+)[\'"][\s*/]*>~sU', $html, $description);
-                        preg_match('~<meta\s+name=[\'"]keywords[\'"]\s+content=[\'"](.+)[\'"][\s*/]*>~sU', $html, $keywords);
+                        preg_match('~<title.*>(.*)</title>~sU', $html, $title);
+                        preg_match('~<meta\s+name=[\'"]description[\'"]\s+content=[\'"](.*)[\'"][\s*/]*>~sU', $html, $description);
+                        preg_match('~<meta\s+name=[\'"]keywords[\'"]\s+content=[\'"](.*)[\'"][\s*/]*>~sU', $html, $keywords);
 
+                        if(preg_match('~<meta\s+charset=[\'"]windows-1251[\'"][\s*/]*>~sU', $html, $checkCP1251)){
+                            $title[1] = iconv('cp1251', 'utf-8', $title[1]);
+                            $description[1] = iconv('cp1251', 'utf-8', $description[1]);
+                            $keywords[1] = iconv('cp1251', 'utf-8', $keywords[1]);
+                        }
 
                         $CIBlockElement = new \CIBlockElement();
                         $elementId = $CIBlockElement->Add([
                             'IBLOCK_ID' => $data['iblock_id'],
                             'NAME' => $title[1],
-                            'CODE' => $data['link'],
-                            'CREATED_BY' => $GLOBALS['USER_ID'],
+                            'CREATED_BY' => $GLOBALS['USER']->GetID(),
                             'PROPERTY_VALUES' => [
-                                'FAVICON' => \CFile::MakeFileArray($favicon),
-                                'DESCRIPTION' => $description[1],
-                                'KEYWORDS' => $keywords[1],
-                                'PASSWORD' => $data['password'],
+                                $data['PROPERTY_LINK'] => $data['link'],
+                                $data['PROPERTY_FAVICON'] => \CFile::MakeFileArray($favicon),
+                                $data['PROPERTY_DESCRIPTION'] => $description[1],
+                                $data['PROPERTY_KEYWORDS'] => $keywords[1],
+                                $data['PROPERTY_PASSWORD'] => $data['password'],
                             ],
-
-
                         ]);
                         if($elementId){
                             return [
@@ -146,6 +150,7 @@ class BookmarkAdd extends \CBitrixComponent implements Controllerable {
     }
 
     function getFavicon($domain, $html){
+        $favicon = false;
         $regExPattern = '/((<link[^>]+rel=.(icon|shortcut icon|alternate icon)[^>]+>))/i';
         if (@preg_match($regExPattern, $html, $matchTag)) {
             $regExPattern = '/href=(\'|\")(.*?)\1/i';
@@ -158,10 +163,7 @@ class BookmarkAdd extends \CBitrixComponent implements Controllerable {
 
         // Мне повезёт!
         if (empty($favicon)) {
-            $favicon = $domain['scheme'] . '://' . $domain . '/favicon.ico';
-            if (!@getimagesize($favicon)) {
-                unset($favicon);
-            }
+            $favicon = $domain['scheme'] . '://' . $domain['host'] . '/favicon.ico';
         }
 
         return $favicon;

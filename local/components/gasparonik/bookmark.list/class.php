@@ -1,19 +1,23 @@
 <?php
+
 namespace Gasparonik\Components;
+
 use Bitrix\Main\Engine\Contract\Controllerable;
 use Bitrix\Main\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
-class BookMarkList extends \CBitrixComponent implements Controllerable{
+class BookMarkList extends \CBitrixComponent implements Controllerable
+{
 
     public function onPrepareComponentParams($params)
     {
         return $params;
     }
 
-    function configureActions(){
+    function configureActions()
+    {
         return [
             'excel' => []
         ];
@@ -26,18 +30,19 @@ class BookMarkList extends \CBitrixComponent implements Controllerable{
         $this->includeComponentTemplate();
     }
 
-    function getBookmarks($pageLength = false){
+    function getBookmarks($pageLength = false)
+    {
 
-        if($pageLength = intval($pageLength)){
+        if ($pageLength = intval($pageLength)) {
             $arNavParams = [
                 'nPageSize' => $pageLength
             ];
-        }else{
+        } else {
             $arNavParams = false;
         }
 
 
-        if(Loader::includeModule('iblock')){
+        if (Loader::includeModule('iblock')) {
             $arResult['ITEMS'] = [];
             $bookmarks = \CIBlockElement::GetList(
                 [
@@ -51,7 +56,7 @@ class BookMarkList extends \CBitrixComponent implements Controllerable{
                 $arNavParams
             );
             $bookmarks->SetUrlTemplates($this->arParams['DETAIL_URL']);
-            while ($bookmark = $bookmarks->GetNextElement()){
+            while ($bookmark = $bookmarks->GetNextElement()) {
                 $arResult['ITEMS'][] = $bookmark->GetFields();
                 $arResult['ITEMS'][count($arResult['ITEMS']) - 1]['PROPERTIES'] = $bookmark->GetProperties();
             }
@@ -71,13 +76,14 @@ class BookMarkList extends \CBitrixComponent implements Controllerable{
         return [];
     }
 
-    function excelAction($data){
+    function excelAction($data)
+    {
         $spreadsheet = new Spreadsheet();
 
         $sheet = $spreadsheet->getActiveSheet();
-        $metaKeywordsSource = \COption::GetOptionString('bookmark', 'KEYWORDS_PROPERTY', 'KEYWORDS');
-        $metaDescriptionSource = \COption::GetOptionString('bookmark', 'DESCRIPTION_PROPERTY', 'KEYWORDS');
-
+        $metaLinkSource = $data['settings']['PROPERTY_LINK'];
+        $metaKeywordsSource = $data['settings']['PROPERTY_KEYWORDS'];
+        $metaDescriptionSource = $data['settings']['PROPERTY_DESCRIPTION'];
 
 
         $sheet->setCellValue('A1', 'ID');
@@ -86,14 +92,14 @@ class BookMarkList extends \CBitrixComponent implements Controllerable{
         $sheet->setCellValue('D1', 'Keywords');
         $sheet->setCellValue('E1', 'Description');
 
-        foreach($this->getBookmarks()['ITEMS'] as $id => $bookmark){
+        foreach ($this->getBookmarks()['ITEMS'] as $id => $bookmark) {
             $columnNumber = $id + 2;
-            
+
             $sheet->setCellValue("A$columnNumber", $bookmark['ID']);
             $sheet->setCellValue("B$columnNumber", $bookmark['NAME']);
-            $sheet->setCellValue("C$columnNumber", $bookmark['CODE']);
-            $sheet->setCellValue("D$columnNumber", $bookmark[$metaKeywordsSource]);
-            $sheet->setCellValue("E$columnNumber", $bookmark[$metaDescriptionSource]);
+            $sheet->setCellValue("C$columnNumber", $bookmark['PROPERTIES'][$metaLinkSource]['VALUE']);
+            $sheet->setCellValue("D$columnNumber", $bookmark['PROPERTIES'][$metaKeywordsSource]['VALUE']);
+            $sheet->setCellValue("E$columnNumber", $bookmark['PROPERTIES'][$metaDescriptionSource]['VALUE']);
         }
 
         $writer = new Xlsx($spreadsheet);
@@ -104,7 +110,8 @@ class BookMarkList extends \CBitrixComponent implements Controllerable{
 
         return [
             'status' => 'success',
-            'file' => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,".base64_encode($excelData)
+            'file' => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($excelData),
+            'name' => 'bookmarks ' . date('Y-m-d H:i:s') . '.xlsx'
         ];
     }
 }

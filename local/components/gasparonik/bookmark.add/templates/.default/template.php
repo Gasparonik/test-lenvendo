@@ -11,4 +11,10 @@
     </div>
     <button type="submit" class="btn btn-primary">Отправить</button>
     <input type="hidden" id="bookmark-iblock" value="<?=$arParams['IBLOCK_ID']?>">
+    <input type="hidden" id="PROPERTY_LINK" value="<?=$arParams['PROPERTY_LINK']?>">
+    <input type="hidden" id="PROPERTY_FAVICON" value="<?=$arParams['PROPERTY_FAVICON']?>">
+    <input type="hidden" id="PROPERTY_PASSWORD" value="<?=$arParams['PROPERTY_PASSWORD']?>">
+    <input type="hidden" id="PROPERTY_DESCRIPTION" value="<?=$arParams['PROPERTY_DESCRIPTION']?>">
+    <input type="hidden" id="PROPERTY_KEYWORDS" value="<?=$arParams['PROPERTY_KEYWORDS']?>">
+    <input type="hidden" id="PROPERTY_PASSWORD" value="<?=$arParams['PROPERTY_PASSWORD']?>">
 </form>

@@ -12,7 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         data: {
                             'link': BX('bookmark-url').value,
                             'password': pass,
-                            'iblock_id': BX('bookmark-iblock').value
+                            'iblock_id': BX('bookmark-iblock').value,
+                            'PROPERTY_LINK': BX('PROPERTY_LINK').value,
+                            'PROPERTY_FAVICON': BX('PROPERTY_FAVICON').value,
+                            'PROPERTY_DESCRIPTION': BX('PROPERTY_DESCRIPTION').value,
+                            'PROPERTY_KEYWORDS': BX('PROPERTY_KEYWORDS').value,
+                            'PROPERTY_PASSWORD': BX('PROPERTY_PASSWORD').value,
+
                         }
                     }
                 });

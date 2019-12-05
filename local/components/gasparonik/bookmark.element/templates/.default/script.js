@@ -13,7 +13,7 @@ function bookMarkDelete(id, iblockID) {
     });
     request.then(function (response) {
         if (response.data.status === 'success') {
-            window.location.reload();
+            window.location = './../';
         } else {
             alert(response.data.reason);
         }
